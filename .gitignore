@@ -1,3 +1,12 @@
+# Output
+tool_doc.txt
+*.png
+
+# Execution Sandbox
+execution_sandbox/nodes/
+execution_sandbox/flow.py
+execution_sandbox/main.py
+
 # Python
 __pycache__/
 *.py[cod]
