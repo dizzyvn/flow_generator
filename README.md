@@ -77,6 +77,12 @@ This will generate a Python function implementation with:
 - Error handling
 - Implementation Details
 
+A tool creating workflow can be as follows
+
+1. Describe your tool and generate a template with generate_tool.py
+2. Fulfill the tool logic, while following the inputs and outputs schema
+3. Make sure your tool always return a SAME structure of data !
+
 ## Implementation Details
 
 The project is built using PocketFlow, a minimalist framework for building LLM-powered applications. The system follows a four-step workflow to generate and execute code from natural language requirements:
