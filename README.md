@@ -201,7 +201,7 @@ The generated code follows a consistent structure:
 
 ## Todo
 
-* [ ] Test with batch node
+* [X] Test with batch node
 * [ ] Test with conditional branch
 * [ ] Figure out how to implement the user `<->` planner interaction
 
