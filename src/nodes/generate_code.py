@@ -35,12 +35,12 @@ class GenerateCode(Node):
         For each node:
         - Pre-processing logic goes in prep()
         - Post-processing logic goes in post()
-        - The exec() method MUSE USE ONLY ONE of the provided tools
+        - The exec() method of a node MUST USE ONLY ONE of the provided tools. If a step require multiple tools, split it into multiple nodes.
         Which means only the following structure is allowed
         def exec(self, prep_res):
             return selected_tool(prep_res)
         - Name of the node file must end with "_node.py". They will be placed in `nodes` and imported as `from nodes.node_name import NodeName`
-        - Use BatchNode instead of Node if the node takes a batch of input, process each item, and return a batch of output.
+        - If the node take a single input, use Node. If the node takes a batch of input, process each item, and return a batch of output, use BatchNode.
 
         Output Format:
         Your response must contain exactly these files, each wrapped in a code block with the filename:
@@ -63,9 +63,11 @@ class GenerateCode(Node):
                 return tool_name(**prep_res)
 
             def post(self, shared, prep_res, exec_res):
-                # Write to shared store and routing if needed
                 # Describe the data to be returned by post()
+                # Always show an example of the data will be written to the shared store
                 pass
+                
+                # Write to shared store and routing if needed
         ```
 
         ```flow.py
