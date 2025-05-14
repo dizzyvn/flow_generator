@@ -66,7 +66,7 @@ Parameters:
 The repository includes a helper script to generate tool implementations based on descriptions:
 
 ```bash
-python src/helper/generate_tool.py --description "Your tool description here"
+python -m src.helper.generate_tool --description "Your tool description here"
 ```
 
 This will generate a Python function implementation with:
