@@ -267,3 +267,157 @@ def get_weather_info(location: str, units: str = "metric") -> Dict[str, Any]:
         "humidity": 58,
         "wind_speed": 6.4 if units == "metric" else 3.98,
     }
+
+
+def summarize_text(
+    text: str, style: str = "neutral", length: str = "medium"
+) -> Dict[str, str]:
+    """
+    Generates a summary of the given text with specified content style and length.
+
+    Parameters:
+        text (str): The input text to summarize.
+        style (str, optional): The style of the summary (e.g., "formal", "casual", "neutral").
+        length (str, optional): The desired length of the summary (e.g., "short", "medium", "long").
+
+    Returns:
+        Dict[str, str]: A dictionary containing:
+            - summary (str): The summarized text.
+            - style (str): The summary style.
+            - length (str): The summary length.
+    """
+    if not text:
+        raise ValueError("Input text cannot be empty.")
+
+    if style not in {"formal", "casual", "neutral"}:
+        raise ValueError(
+            f"Invalid style: {style}. Choose from 'formal', 'casual', or 'neutral'."
+        )
+
+    if length not in {"short", "medium", "long"}:
+        raise ValueError(
+            f"Invalid length: {length}. Choose from 'short', 'medium', or 'long'."
+        )
+
+    return {
+        "summary": "This is a mock summary based on the requested style and length.",
+        "style": style,
+        "length": length,
+    }
+
+
+def search_datasets(research_topic: str, source: str = "all") -> List[Dict[str, Any]]:
+    """
+    Searches public repositories for datasets relevant to a research topic.
+
+    Parameters:
+        research_topic (str): The topic or keywords to search for.
+        source (str, optional): The repository to search in (e.g., 'Kaggle', 'UCI', 'all'). Defaults to 'all'.
+
+    Returns:
+        List[Dict[str, Any]]: A list of datasets with keys:
+            - name (str): The name of the dataset.
+            - description (str): A brief description of the dataset.
+            - source (str): The repository where the dataset is available.
+            - url (str): The URL to access the dataset.
+            - size (str): The size of the dataset (e.g., '10MB', '1GB').
+    """
+    if not research_topic:
+        raise ValueError("The 'research_topic' parameter cannot be empty.")
+
+    if source not in {"Kaggle", "UCI", "all"}:
+        raise ValueError(
+            "Invalid value for 'source'. Must be 'Kaggle', 'UCI', or 'all'."
+        )
+
+    # Mock data
+    return [
+        {
+            "name": "Global Temperature Data",
+            "description": "A dataset containing historical temperature data across the globe.",
+            "source": "Kaggle",
+            "url": "https://kaggle.com/datasets/global-temperature",
+            "size": "20MB",
+        },
+        {
+            "name": "Iris Dataset",
+            "description": "A classic dataset for machine learning on iris plant classification.",
+            "source": "UCI",
+            "url": "https://archive.ics.uci.edu/ml/datasets/iris",
+            "size": "10KB",
+        },
+    ]
+
+
+def critique_paper(
+    draft: str, reviewer_personas: List[str] = None
+) -> List[Dict[str, Any]]:
+    """
+    Provides critique or review suggestions for a draft paper using simulated reviewer personas.
+
+    Parameters:
+        draft (str): The draft paper text to critique.
+        reviewer_personas (List[str], optional): List of reviewer personas, such as
+            "Editor","Scientist", "General Reader", etc.
+
+    Returns:
+        List[Dict[str, Any]]: A list of critiques with keys:
+            - persona (str): The reviewer persona providing the critique.
+            - feedback (str): Specific feedback or suggestions for the draft.
+            - strengths (List[str]): Identified strengths in the draft.
+            - weaknesses (List[str]): Identified weaknesses in the draft.
+    """
+    # Mock implementation with example data
+    return [
+        {
+            "persona": "Editor",
+            "feedback": "The paper is well-structured, but the introduction lacks a clear thesis statement.",
+            "strengths": ["Clear structure", "Good use of citations"],
+            "weaknesses": ["Weak thesis statement", "Needs stronger conclusion"],
+        },
+        {
+            "persona": "Scientist",
+            "feedback": "The methodology is rigorous, but the discussion does not fully explore the implications of the results.",
+            "strengths": ["Strong methodology", "Relevant references"],
+            "weaknesses": ["Shallow discussion", "Some missing data points"],
+        },
+        {
+            "persona": "General Reader",
+            "feedback": "The paper is informative, but some technical terms are not explained, making it hard to follow.",
+            "strengths": ["Interesting topic", "Engaging writing"],
+            "weaknesses": [
+                "Lack of non-technical explanations",
+                "Jargon-heavy in some areas",
+            ],
+        },
+    ]
+
+
+def extract_structured_data(
+    document_path: str, template: Optional[Dict[str, Any]] = None
+) -> List[Dict[str, Any]]:
+    """
+    Extracts structured data from semi-structured documents.
+
+    Parameters:
+        document_path (str): The file path to the semi-structured document to process.
+        template (dict, optional): An optional template for extracting specific fields,
+            e.g., {"name": "regex_for_name", "date": "regex_for_date"}.
+
+    Returns:
+        List[Dict[str, Any]]: A list of extracted data entries where each entry includes:
+            - field_name (str): The name of the extracted field.
+            - value (str): The extracted value for the field.
+            - confidence (float): Confidence level of the extraction (0.0 to 1.0).
+    """
+    # Mock implementation with sample data
+    if not document_path.endswith((".pdf", ".docx", ".txt")):
+        raise ValueError(
+            "Unsupported file format. Please provide a .pdf, .docx, or .txt file."
+        )
+
+    return [
+        {"field_name": "Name", "value": "John Doe", "confidence": 0.95},
+        {"field_name": "Date", "value": "2023-10-07", "confidence": 0.99},
+        {"field_name": "Total Amount", "value": "$1,250.00", "confidence": 0.92},
+    ]
