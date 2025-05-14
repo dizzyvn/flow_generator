@@ -6,36 +6,37 @@ Note: These are placeholders and do not perform real operations.
 from typing import Any, Dict, List, Optional
 
 
-def read_mail(
-    email_account: str, password_or_token: str, filters: Optional[Dict] = None
-) -> List[Dict[str, Any]]:
+def fetch_emails(query: str, max_results: Optional[int] = 10) -> List[Dict[str, Any]]:
     """
-    Retrieves emails from the specified account with optional filters.
+    Fetches multiple emails based on a given query.
 
     Parameters:
-        email_account (str): Email address to access.
-        password_or_token (str): Authentication credential.
-        filters (dict, optional): Optional filters such as unread_only, from_address, subject_keywords.
+        query (str): Search query to filter emails, e.g., keywords or sender email.
+        max_results (int, optional): Maximum number of results to fetch. Default is 10.
 
     Returns:
-        List[Dict[str, Any]]: List of emails with keys:
+        List[Dict[str, Any]]: List of matching emails with the following keys:
             - email_id (str): Unique identifier of the email.
             - sender (str): Sender's email address.
             - subject (str): Subject line of the email.
             - body (str): Email content.
             - timestamp (str): Time received in ISO 8601 format.
-            - thread_id (str): ID of the email thread if available.
     """
-    return [
+    if not query:
+        raise ValueError("The query parameter cannot be empty.")
+
+    mock_data = [
         {
-            "email_id": "12345",
-            "sender": "example@example.com",
-            "subject": "Test Email",
-            "body": "This is a test email.",
-            "timestamp": "2025-05-13T12:00:00Z",
-            "thread_id": "thread-001",
+            "email_id": f"email_{i}",
+            "sender": f"sender{i}@example.com",
+            "subject": f"Subject {i}: {query}",
+            "body": f"This is the body of the email that matches the query '{query}'.",
+            "timestamp": f"2023-10-01T0{i}:00:00Z",
         }
+        for i in range(1, (max_results or 10) + 1)
     ]
+
+    return mock_data
 
 
 def generate_response(
