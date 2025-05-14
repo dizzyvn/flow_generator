@@ -22,16 +22,16 @@ class GenerateCode(Node):
 
         PocketFlow Documentation:
         {pocketflow_doc}
-        
+
         Available Tools:
         {tools_doc}
-        
+
         Design a complete flow that satisfies the requirement following these rules:
         1. Follow PocketFlow's patterns and best practices
         2. Have clear node responsibilities and transitions
         3. Use only the provided tools in node.exec() methods
         4. Each node must follow the three-step pattern: prep(), exec(), post()
-        
+
         For each node:
         - Pre-processing logic goes in prep()
         - Post-processing logic goes in post()
@@ -41,24 +41,25 @@ class GenerateCode(Node):
             return selected_tool(prep_res)
         - Name of the node file must end with "_node.py". They will be placed in `nodes` and imported as `from nodes.node_name import NodeName`
         - Use BatchNode instead of Node if the node takes a batch of input, process each item, and return a batch of output.
-        
+
         Output Format:
         Your response must contain exactly these files, each wrapped in a code block with the filename:
-        
+
         ```thinking.txt
-        Your thinking process goes here, explaining the nodes, the tools to use, and the flow.
+        Your thinking process goes here.
+        First explain the flow, then explain the nodes, including its description, the node type (Node, BatchNode, etc.), the tool it uses, the inputs and where they come from (from node_name, or from initial shared store), and the outputs.
         ```
-        
+
         ```node_name.py
         from pocketflow import Node
         from utils.tools import tool_name
-        
+
         class NodeName(Node):
             def prep(self, shared):
                 # Prepare the data for the tool
                 return {{"param1": value1, "param2": value2, ...}}
-                
-            def exec(self, prep_res):            
+
+            def exec(self, prep_res):
                 return tool_name(**prep_res)
 
             def post(self, shared, prep_res, exec_res):
@@ -70,7 +71,7 @@ class GenerateCode(Node):
         ```flow.py
         from pocketflow import Flow
         from nodes.node_name import NodeName
-        
+
         def create_flow():
             # Create and connect nodes, use the node_name.py file as a reference
             pass
@@ -78,24 +79,24 @@ class GenerateCode(Node):
 
         ```main.py
         from flow import create_flow
-        
+
         def main():
             # Ask user for important inputs and store them in shared store
             x = input("x: ")
 
             # Initialize shared store and run flow
             shared = {{
-                "x_key": x,                
+                "x_key": x,
                 ...
             }}
 
             flow = create_flow()
             flow.run(shared)
-            
+
             # Print the result
             for key, value in shared.items():
                 print(f"{{key}}: {{value}}")
-            
+
         if __name__ == "__main__":
             main()
         ```
