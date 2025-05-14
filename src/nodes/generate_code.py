@@ -80,8 +80,17 @@ class GenerateCode(Node):
         from flow import create_flow
         
         def main():
+            # Ask user for important inputs and store them in shared store
+            x = input("x: ")
+
             # Initialize shared store and run flow
-            pass
+            shared = {{
+                "x_key": x,                
+                ...
+            }}
+
+            flow = create_flow()
+            flow.run(shared)
             
             # Print the result
             for key, value in shared.items():
