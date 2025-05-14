@@ -1,4 +1,4 @@
-from pocketflow import Flow
+from pocketflow import BatchNode, Flow, Node
 
 
 def build_mermaid(start):
@@ -13,6 +13,15 @@ def build_mermaid(start):
 
     def link(a, b):
         lines.append(f"    {a} --> {b}")
+
+    def get_node_style(node):
+        if isinstance(node, BatchNode):
+            return (
+                "fill:#ffd700,stroke:#333,stroke-width:2px"  # Gold color for BatchNode
+            )
+        elif isinstance(node, Node):
+            return "fill:#90EE90,stroke:#333,stroke-width:2px"  # Light green for regular Node
+        return "fill:#f9f9f9,stroke:#333,stroke-width:2px"  # Default style
 
     def walk(node, parent=None):
         if node in visited:
@@ -30,9 +39,12 @@ def build_mermaid(start):
                 ) or walk(nxt)
             lines.append("    end\n")
         else:
-            lines.append(f"    {(nid := get_id(node))}['{type(node).__name__}']")
-            parent and link(parent, nid)
-            [walk(nxt, nid) for nxt in node.successors.values()]
+            node_id = get_id(node)
+            style = get_node_style(node)
+            lines.append(f"    {node_id}['{type(node).__name__}']:::node_{node_id}")
+            lines.append(f"    classDef node_{node_id} {style}")
+            parent and link(parent, node_id)
+            [walk(nxt, node_id) for nxt in node.successors.values()]
 
     walk(start)
     return "\n".join(lines)
