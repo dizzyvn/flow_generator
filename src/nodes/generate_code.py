@@ -81,6 +81,8 @@ class GenerateCode(Node):
 
         ```main.py
         from flow import create_flow
+        from utils.logging_config import setup_logging
+        setup_logging()        
 
         def main():        
             # Initialize shared store and run flow
