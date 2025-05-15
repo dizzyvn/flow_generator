@@ -33,14 +33,42 @@ class GenerateCode(Node):
         4. Each node must follow the three-step pattern: prep(), exec(), post()
 
         For each node:
-        - Pre-processing logic goes in prep()
-        - Post-processing logic goes in post()
-        - The exec() method of a node MUST USE ONLY ONE of the provided tools. If a step require multiple tools, split it into multiple nodes.
-        Which means only the following structure is allowed
-        def exec(self, prep_res):
-            return selected_tool(prep_res)
         - Name of the node file must end with "_node.py". They will be placed in `nodes` and imported as `from nodes.node_name import NodeName`
         - If the node take a single input, use Node. If the node takes a batch of input, process each item, and return a batch of output, use BatchNode.
+        - Pre-processing logic goes in prep()
+        - Post-processing logic goes in post()
+        - The exec() method of a node MUST USE ONLY ONE of the provided tools, or directly return the prep_res. If a step require multiple tools, split it into multiple nodes. Only the following code is allowed!
+        ```python
+        def exec(self, prep_res): # ONLY prep_res is used as input !!! 
+            # NO data processing in exec()
+            return selected_tool(prep_res)
+            or return prep_res
+        ```
+        and
+        ```python
+        def exec(self, prep_res):
+            return prep_res
+        ```
+        - All the preprocessing must be done in prep(). Instead of
+        ```python
+        def prep(self, shared):
+            x = shared['x']
+            return {{'x': x}}
+
+        def exec(self, prep_res):            
+            y = prep_res['y']
+            return selected_tool(y)
+        ```
+        Do this:
+        ```python
+        def prep(self, shared):
+            y = shared['x']['y']            
+            return {{'y': y}}
+
+        def exec(self, prep_res):            
+            return selected_tool(**prep_res)
+        ```                        
+
 
         Output Format:
         Your response must contain exactly these files, each wrapped in a code block with the filename:
@@ -52,22 +80,32 @@ class GenerateCode(Node):
 
         ```node_name.py
         from pocketflow import Node
-        from utils.tools import tool_name
+        from utils.tools import tool_name # Tools is located in `utils/tools.py` !!
 
         class NodeName(Node):
             def prep(self, shared):
-                # Prepare the data for the tool
+                # Prepare the data for the tool from the shared store. Some preprocessing can be done here
+                # Example:
+                value1 = ... # from shared store
+                value2 = ... # from shared store
                 return {{"param1": value1, "param2": value2, ...}}
 
+            # The exec() method of a node MUST USE ONLY ONE of the provided tools, or directly return the prep_res.
             def exec(self, prep_res):
                 return tool_name(**prep_res)
 
-            def post(self, shared, prep_res, exec_res):
-                # Describe the data to be returned by post()
-                # Always show an example of the data will be written to the shared store
-                pass
+            def post(self, shared, pnoderep_res, exec_res):
+                # Describe the data to be returned by post(), write it to shared store. Always show an example of the data will be written to the shared store
+                # Example:
+                # shared["key_1"] = ...
+                # shared["key_2"] = ...
 
-                # Write to shared store and routing if needed
+                # Also, return action to routing if needed
+                # Example:
+                if ...:                    
+                    return "action_1"
+                else:                    
+                    return "action_2"
         ```
 
         ```flow.py
@@ -79,7 +117,6 @@ class GenerateCode(Node):
         def create_flow():
             # Create and connect nodes, use the node_name.py file as a reference
             # Explicitly use terminate_node to terminate the flow
-            pass
         ```
 
         ```main.py
