@@ -1,4 +1,4 @@
-# Code First Flow Generator
+# Flow Generator
 
 A powerful tool for generating code flows based on natural language requirements using PocketFlow framework. This project helps you create, visualize, and manage code flows for various applications.
 
@@ -12,7 +12,7 @@ This repository provides a framework for generating code flows from natural lang
 
 ```bash
 git clone <repository-url>
-cd code_first_flow_generator
+cd flow_generator
 ```
 
 2. Create and activate a virtual environment:
