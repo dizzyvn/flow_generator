@@ -463,3 +463,137 @@ flowchart LR
         inventoryFlow --> shippingFlow
     end
 </document>
+
+# Workflow Design pattern
+## Prompt Chaining
+Break tasks into sequential steps, where each LLM call processes the output of the previous one.
+
+python
+# Define the nodes
+outline_creator = CreateOutlineNode()
+outline_validator = ValidateOutlineNode()
+document_writer = WriteDocumentNode()
+
+# Chain them together
+outline_creator >> outline_validator
+outline_validator - "valid" >> document_writer
+outline_validator - "invalid" >> outline_creator  # Loop back for revision
+
+# Create the flow
+document_flow = Flow(start=outline_creator)
+This pattern is ideal when a task can be cleanly broken into fixed subtasks, trading latency for higher accuracy.
+
+## Routing
+Pattern 2: Routing
+Classify input and direct it to specialized paths based on the classification.
+
+python
+# Define the nodes
+classifier = ClassifyQueryNode()
+general_query = GeneralQueryNode()
+refund_request = RefundRequestNode()
+technical_support = TechnicalSupportNode()
+
+# Set up routing based on classification
+classifier - "general" >> general_query
+classifier - "refund" >> refund_request
+classifier - "technical" >> technical_support
+
+# Create the flow
+support_flow = Flow(start=classifier)
+This pattern works well for handling distinct categories that are better processed separately.
+
+# Pattern 3: Parallelization
+Break a task into independent subtasks that can run in parallel.
+
+python
+# Define the nodes
+dispatcher = DispatchTaskNode()
+content_processor = ProcessContentNode()
+safety_checker = CheckSafetyNode()
+result_aggregator = AggregateResultsNode()
+
+# Set up parallel paths
+dispatcher >> content_processor
+dispatcher >> safety_checker
+content_processor >> result_aggregator
+safety_checker >> result_aggregator
+
+# Create the flow
+parallel_flow = Flow(start=dispatcher)
+
+# Pattern 4: Voting (Multiple Attempts)
+Run the same task multiple times to get diverse outputs and aggregate them.
+
+python
+# Using BatchNode approach
+class CodeReviewBatch(BatchNode):
+    def prep(self, shared):
+        # Return different security aspects to check
+        return ["sql_injection", "xss", "authentication", "authorization"]
+
+    def exec(self, security_aspect):
+        # Check code for specific security aspect
+        # Implementation details omitted
+        return result
+
+    def post(self, shared, prep_res, exec_res_list):
+        # Aggregate all security reviews
+        shared["security_issues"] = [issue for issues in exec_res_list for issue in issues]
+        return "default"
+
+# Create the flow
+review_node = CodeReviewBatch()
+result_processor = ProcessResultsNode()
+
+review_node >> result_processor
+code_review_flow = Flow(start=review_node)
+This pattern is effective when parallel subtasks improve speed or when multiple perspectives increase confidence.
+
+# Pattern 4: Orchestrator-Workers
+A central LLM dynamically breaks down tasks, delegates them to worker LLMs, and synthesizes results.
+
+python
+# Define the nodes
+orchestrator = OrchestratorNode()
+file_analyzer = AnalyzeFileNode()
+code_generator = GenerateCodeNode()
+code_tester = TestCodeNode()
+result_synthesizer = SynthesizeResultsNode()
+
+# Set up orchestrator connections
+orchestrator - "analyze" >> file_analyzer
+orchestrator - "generate" >> code_generator
+orchestrator - "test" >> code_tester
+
+# Workers report back to orchestrator
+file_analyzer >> orchestrator
+code_generator >> orchestrator
+code_tester >> orchestrator
+
+# Final synthesis
+orchestrator - "synthesize" >> result_synthesizer
+
+# Create the flow
+coding_flow = Flow(start=orchestrator)
+This pattern suits complex tasks where subtasks can't be predetermined and must be dynamically identified.
+
+# Pattern 5: Evaluator-Optimizer
+One LLM generates a response while another evaluates and provides feedback in a loop.
+
+python
+# Define the nodes
+translator = TranslateTextNode()
+evaluator = EvaluateTranslationNode()
+refiner = RefineTranslationNode()
+finalizer = FinalizeTranslationNode()
+
+# Set up evaluation loop
+translator >> evaluator
+evaluator - "needs_improvement" >> refiner
+refiner >> evaluator  # Loop back for re-evaluation
+evaluator - "acceptable" >> finalizer
+
+# Create the flow
+translation_flow = Flow(start=translator)
+This pattern works when you have clear evaluation criteria and iterative refinement provides measurable value.
