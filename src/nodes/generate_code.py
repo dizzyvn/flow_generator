@@ -66,33 +66,33 @@ class GenerateCode(Node):
                 # Describe the data to be returned by post()
                 # Always show an example of the data will be written to the shared store
                 pass
-                
+
                 # Write to shared store and routing if needed
         ```
 
         ```flow.py
-        from pocketflow import Flow
+        from pocketflow import Flow, TerminateNode
         from nodes.node_name import NodeName
+
+        terminate_node = TerminateNode()
 
         def create_flow():
             # Create and connect nodes, use the node_name.py file as a reference
+            # Explicitly use terminate_node to terminate the flow
             pass
         ```
 
         ```main.py
         from flow import create_flow
         from utils.logging_config import setup_logging
-        setup_logging()        
+        setup_logging()
 
-        def main():        
+        def main():
             # Initialize shared store and run flow
+            # Simulate all required user's input for the flow here
             shared = {{...}}
             flow = create_flow()
             flow.run(shared)
-
-            # Print the result of shared store
-            for key, value in shared.items():
-                print(f"{{key}}: {{value}}")
 
         if __name__ == "__main__":
             main()
