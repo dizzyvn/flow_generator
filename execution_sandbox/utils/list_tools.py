@@ -40,7 +40,8 @@ def print_tools():
     print(f"Number of available tools: {len(tools)}")
     print("*" * 80)
 
-    for tool in tools:
+    sorted_tools = sorted(tools, key=lambda x: x["name"])
+    for tool in sorted_tools:
         print(f"{tool['name']}{tool['signature']}")
 
 
