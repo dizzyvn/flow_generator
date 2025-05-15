@@ -79,6 +79,25 @@ def build_mermaid(start):
         function_calls = get_exec_function_calls(node)
         logger.debug(f"Node {node_name} has function calls: {function_calls}")
 
+        # # Get post method's return value if available
+        # post_action = None
+        # if hasattr(node, "post"):
+        #     try:
+        #         post_source = inspect.getsource(node.post)
+        #         # Look for return statement in post method
+        #         for line in post_source.split("\n"):
+        #             if "return" in line:
+        #                 # Split by # to remove comments
+        #                 return_part = line.split("#")[0]
+        #                 # Extract the return value
+        #                 post_action = (
+        #                     return_part.split("return")[1].strip().strip("\"'")
+        #                 )
+        #                 break
+        #     except Exception:
+        #         pass
+        # if post_action:
+        #     label_parts.append(f"Returns: {post_action}")
         label_parts = [f"{node_type}<br>{node_name}"]
         if function_calls:
             label_parts.append(f"Tools: {', '.join(function_calls)}")
@@ -99,10 +118,11 @@ def build_mermaid(start):
                 f"\n    subgraph sub_flow_{get_id(node)}[{type(node).__name__}]"
             )
             node.start_node and walk(node.start_node)
-            for cond, nxt in node.successors.items():
-                node.start_node and walk(nxt, get_id(node.start_node), cond) or (
-                    parent and link(parent, get_id(nxt), cond)
-                ) or walk(nxt, None, cond)
+            for cond, successors in node.successors.items():
+                for succ in successors:
+                    node.start_node and walk(succ, get_id(node.start_node), cond) or (
+                        parent and link(parent, get_id(succ), cond)
+                    ) or walk(succ, None, cond)
             lines.append("    end\n")
         else:
             node_id = get_id(node)
@@ -113,8 +133,9 @@ def build_mermaid(start):
             lines.append(f"    classDef node_{node_id} {style}")
             parent and link(parent, node_id, condition)
             if hasattr(node, "successors"):
-                for cond, nxt in node.successors.items():
-                    walk(nxt, node_id, cond)
+                for cond, successors in node.successors.items():
+                    for succ in successors:
+                        walk(succ, node_id, cond)
 
     walk(start)
     return "\n".join(lines)
