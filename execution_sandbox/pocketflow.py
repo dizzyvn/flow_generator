@@ -1,9 +1,6 @@
 import copy
-import logging
 import time
 import warnings
-
-logger = logging.getLogger(__name__)
 
 
 class BaseNode:
@@ -32,10 +29,32 @@ class BaseNode:
         return self.exec(prep_res)
 
     def _run(self, shared):
-        p = self.prep(shared)
-        e = self._exec(p)
-        result = self.post(shared, p, e)
-        return result
+        try:
+            # Run the node
+            if hasattr(shared, "track_node_execution"):
+                shared.track_node_execution(
+                    self.__class__.__name__, "started", None, None, None
+                )
+            p = self.prep(shared)
+            if hasattr(shared, "track_node_execution"):
+                shared.track_node_execution(
+                    self.__class__.__name__, "prep", p, None, None
+                )
+            e = self._exec(p)
+            if hasattr(shared, "track_node_execution"):
+                shared.track_node_execution(self.__class__.__name__, "exec", p, e, None)
+            r = self.post(shared, p, e)
+            if hasattr(shared, "track_node_execution"):
+                shared.track_node_execution(self.__class__.__name__, "post", p, e, r)
+            return r
+
+        except Exception as e:
+            # Track failure
+            if hasattr(shared, "track_node_execution"):
+                shared.track_node_execution(
+                    self.__class__.__name__, "error", str(e), None, None
+                )
+            raise e
 
     def run(self, shared):
         if self.successors:
@@ -68,7 +87,6 @@ class Node(BaseNode):
         raise exc
 
     def _exec(self, prep_res):
-        time.sleep(1)
         for self.cur_retry in range(self.max_retries):
             try:
                 return self.exec(prep_res)
@@ -79,28 +97,36 @@ class Node(BaseNode):
                     time.sleep(self.wait)
 
     def _run(self, shared):
-        # Track node execution start
-        logger = logging.getLogger(f"{self.__class__.__name__}")
-
         try:
             # Run the node
             if hasattr(shared, "track_node_execution"):
                 shared.track_node_execution(
                     self.__class__.__name__, "started", None, None, None
                 )
-            logger.info("Started")
             p = self.prep(shared)
             if hasattr(shared, "track_node_execution"):
                 shared.track_node_execution(
                     self.__class__.__name__, "prep", p, None, None
                 )
-            logger.info("Input: %s", p)
             e = self._exec(p)
-            logger.info("Output: %s", e)
+            print(f"\n\n========== Node {self.__class__.__name__} ==========")
+            print("> Input")
+            if isinstance(p, list):
+                for i, item in enumerate(p):
+                    print(f"> Item {i + 1}:{item}")
+            else:
+                print(p)
+
+            print("\n> Output")
+            if isinstance(e, list):
+                for i, item in enumerate(e):
+                    print(f"- Item {i + 1}:{item}")
+            else:
+                print(e)
+
             if hasattr(shared, "track_node_execution"):
                 shared.track_node_execution(self.__class__.__name__, "exec", p, e, None)
             r = self.post(shared, p, e)
-            logger.info("Routing: %s", r)
             if hasattr(shared, "track_node_execution"):
                 shared.track_node_execution(self.__class__.__name__, "post", p, e, r)
             return r
@@ -112,6 +138,10 @@ class Node(BaseNode):
                     self.__class__.__name__, "error", str(e), None, None
                 )
             raise e
+
+
+class TerminateNode(Node):
+    pass
 
 
 class BatchNode(Node):
