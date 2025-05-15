@@ -33,7 +33,7 @@ def main():
         # Use mmdc to convert to specified format
         try:
             subprocess.run(
-                ["mmdc", "-i", input_path, "-o", args.output, "-t png", "-s 3"],
+                ["mmdc", "-i", input_path, "-o", args.output, "-t png"],
                 check=True,
             )
             print(f"Successfully generated {args.output}")
