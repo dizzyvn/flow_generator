@@ -22,9 +22,6 @@ def fetch_emails(query: str, max_results: Optional[int] = 10) -> List[Dict[str, 
             - body (str): Email content.
             - timestamp (str): Time received in ISO 8601 format.
     """
-    if not query:
-        raise ValueError("The query parameter cannot be empty.")
-
     mock_data = [
         {
             "email_id": f"email_{i}",
@@ -37,28 +34,6 @@ def fetch_emails(query: str, max_results: Optional[int] = 10) -> List[Dict[str, 
     ]
 
     return mock_data
-
-
-def generate_response(
-    subject: str, body: str, sender: Optional[str] = None
-) -> Dict[str, str]:
-    """
-    Generates a basic reply email given the original subject and body.
-
-    Parameters:
-        subject (str): Subject of the original email.
-        body (str): Body of the original email.
-        sender (str, optional): Original sender's address.
-
-    Returns:
-        Dict[str, str]: A dictionary containing:
-            - subject (str): Reply subject line.
-            - body (str): Suggested reply content.
-    """
-    return {
-        "subject": f"Re: {subject}",
-        "body": "Thank you for your message. Here's my response.",
-    }
 
 
 def send_mail(
@@ -179,7 +154,7 @@ def fetch_web(url: str, extract_text: bool = True) -> Dict[str, str]:
     }
 
 
-def generate_email_content(
+def write_email(
     content: str,
     tone: str = "professional",
     custom_prompt: Optional[str] = None,
@@ -289,16 +264,6 @@ def summarize_text(
     if not text:
         raise ValueError("Input text cannot be empty.")
 
-    if style not in {"formal", "casual", "neutral"}:
-        raise ValueError(
-            f"Invalid style: {style}. Choose from 'formal', 'casual', or 'neutral'."
-        )
-
-    if length not in {"short", "medium", "long"}:
-        raise ValueError(
-            f"Invalid length: {length}. Choose from 'short', 'medium', or 'long'."
-        )
-
     return {
         "summary": "This is a mock summary based on the requested style and length.",
         "style": style,
@@ -349,75 +314,173 @@ def search_datasets(research_topic: str, source: str = "all") -> List[Dict[str, 
     ]
 
 
-def critique_paper(
-    draft: str, reviewer_personas: List[str] = None
-) -> List[Dict[str, Any]]:
+def write_file(
+    file_content: str, file_path: str, metadata: Optional[Dict[str, str]] = None
+) -> Dict[str, str]:
     """
-    Provides critique or review suggestions for a draft paper using simulated reviewer personas.
+    Saves the given content to a specified file path with optional metadata.
 
     Parameters:
-        draft (str): The draft paper text to critique.
-        reviewer_personas (List[str], optional): List of reviewer personas, such as
-            "Editor","Scientist", "General Reader", etc.
+        file_content (str): The content to be saved in the file.
+        file_path (str): The location where the file should be saved.
+        metadata (dict, optional): Optional metadata such as author, description, or tags.
 
     Returns:
-        List[Dict[str, Any]]: A list of critiques with keys:
-            - persona (str): The reviewer persona providing the critique.
-            - feedback (str): Specific feedback or suggestions for the draft.
-            - strengths (List[str]): Identified strengths in the draft.
-            - weaknesses (List[str]): Identified weaknesses in the draft.
+        Dict[str, str]: A confirmation of the save operation with:
+            - status (str): Status of the operation ('success' or 'failure').
+            - file_path (str): The path where the file was saved.
+            - message (str): Additional information about the operation.
     """
-    # Mock implementation with example data
-    return [
-        {
-            "persona": "Editor",
-            "feedback": "The paper is well-structured, but the introduction lacks a clear thesis statement.",
-            "strengths": ["Clear structure", "Good use of citations"],
-            "weaknesses": ["Weak thesis statement", "Needs stronger conclusion"],
-        },
-        {
-            "persona": "Scientist",
-            "feedback": "The methodology is rigorous, but the discussion does not fully explore the implications of the results.",
-            "strengths": ["Strong methodology", "Relevant references"],
-            "weaknesses": ["Shallow discussion", "Some missing data points"],
-        },
-        {
-            "persona": "General Reader",
-            "feedback": "The paper is informative, but some technical terms are not explained, making it hard to follow.",
-            "strengths": ["Interesting topic", "Engaging writing"],
-            "weaknesses": [
-                "Lack of non-technical explanations",
-                "Jargon-heavy in some areas",
-            ],
-        },
-    ]
+    try:
+        # Mock file write operation
+        if not file_path or not file_content:
+            raise ValueError("Invalid file path or content.")
+        # Simulate saving the content (mock operation)
+        return {
+            "status": "success",
+            "file_path": file_path,
+            "message": "File saved successfully.",
+        }
+    except Exception as e:
+        return {
+            "status": "failure",
+            "file_path": file_path,
+            "message": f"An error occurred: {str(e)}",
+        }
 
 
-def extract_structured_data(
-    document_path: str, template: Optional[Dict[str, Any]] = None
-) -> List[Dict[str, Any]]:
+def read_file(file_path: str, encoding: str = "utf-8") -> Dict[str, Any]:
     """
-    Extracts structured data from semi-structured documents.
+    Reads the content of a file and retrieves metadata.
 
     Parameters:
-        document_path (str): The file path to the semi-structured document to process.
-        template (dict, optional): An optional template for extracting specific fields,
-            e.g., {"name": "regex_for_name", "date": "regex_for_date"}.
+        file_path (str): Path to the file to be read.
+        encoding (str, optional): Encoding used to read the file. Defaults to 'utf-8'.
 
     Returns:
-        List[Dict[str, Any]]: A list of extracted data entries where each entry includes:
-            - field_name (str): The name of the extracted field.
-            - value (str): The extracted value for the field.
-            - confidence (float): Confidence level of the extraction (0.0 to 1.0).
+        Dict[str, Any]: File details and content including:
+            - file_name (str): Name of the file.
+            - file_size (int): Size of the file in bytes.
+            - content (str): Content of the file.
+            - lines (List[str]): List of lines in the file.
     """
-    # Mock implementation with sample data
-    if not document_path.endswith((".pdf", ".docx", ".txt")):
-        raise ValueError(
-            "Unsupported file format. Please provide a .pdf, .docx, or .txt file."
-        )
+    try:
+        mock_file_size = 1024  # Mock size in bytes
+        mock_content = "Mock file content line 1\nMock file content line 2"
+        return {
+            "file_name": file_path.split("/")[-1],
+            "file_size": mock_file_size,
+            "content": mock_content,
+            "lines": mock_content.splitlines(),
+        }
+    except Exception as e:
+        raise FileNotFoundError(f"Error accessing the file: {file_path}. Details: {e}")
 
-    return [
-        {"field_name": "Name", "value": "John Doe", "confidence": 0.95},
-        {"field_name": "Date", "value": "2023-10-07", "confidence": 0.99},
-        {"field_name": "Total Amount", "value": "$1,250.00", "confidence": 0.92},
-    ]
+
+def perform_deep_research(
+    topic: str, level_of_research: str = "basic"
+) -> Dict[str, Any]:
+    """
+    Conducts deep research on a given topic at the specified level of detail.
+
+    Parameters:
+        topic (str): The topic to be researched.
+        level_of_research (str, optional): The depth of research required.
+            Options are "basic", "intermediate", or "advanced". Defaults to "basic".
+
+    Returns:
+        Dict[str, Any]: Detailed research results including:
+            - topic (str): The researched topic.
+            - summary (str): Concise summary of the research.
+            - key_points (List[str]): List of important findings.
+            - sources (List[Dict[str, str]]): Reliable sources with:
+                - source_name (str): Name of the source.
+                - url (str): URL link to the source.
+            - further_reading (List[str]): Recommendations for additional reading.
+    """
+    if not topic:
+        raise ValueError("The 'topic' parameter cannot be empty.")
+
+    mock_data = {
+        "topic": topic,
+        "summary": f"A brief overview of {topic}, emphasizing key aspects based on {level_of_research} research.",
+        "key_points": [
+            "Point 1: Significant finding related to the topic.",
+            "Point 2: Another relevant observation.",
+            "Point 3: Additional noteworthy detail.",
+        ],
+        "sources": [
+            {"source_name": "Reliable Source A", "url": "https://example.com/source-a"},
+            {
+                "source_name": "Trusted Publication B",
+                "url": "https://example.com/source-b",
+            },
+        ],
+        "further_reading": [
+            "Article: Deep Dive into the Subject",
+            "Book: Comprehensive Guide to the Topic",
+            "Research Paper: Evidence and Case Studies",
+        ],
+    }
+    return mock_data
+
+
+def retrieve_paper_pdf(
+    paper_name: Optional[str] = None, url: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Retrieves the PDF file of a research paper based on the given paper name or URL.
+
+    Parameters:
+        paper_name (str, optional): Name of the paper to retrieve.
+        url (str, optional): URL of the paper to retrieve.
+
+    Returns:
+        Dict[str, Any]: Information about the retrieved paper including:
+            - paper_name (str): Name of the paper.
+            - url (str): URL of the paper.
+            - pdf_link (str): Direct link to the PDF file.
+            - status (str): Status of the retrieval process (e.g., 'success', 'not_found', 'error').
+    """
+    if not paper_name and not url:
+        raise ValueError("Either 'paper_name' or 'url' must be provided.")
+
+    # Mock logic and data
+    if paper_name:
+        return {
+            "paper_name": paper_name,
+            "url": f"https://example.com/{paper_name.replace(' ', '_')}",
+            "pdf_link": f"https://example.com/{paper_name.replace(' ', '_')}.pdf",
+            "status": "success",
+        }
+    elif url:
+        return {
+            "paper_name": "Example Paper",
+            "url": url,
+            "pdf_link": f"{url}/paper.pdf",
+            "status": "success",
+        }
+
+
+def extract_text_from_document(file_path: str) -> str:
+    """
+    Extracts text content from a specified document.
+
+    Parameters:
+        file_path (str): Path to the document file.
+
+    Returns:
+        str: Extracted text content from the document.
+    """
+    try:
+        # Mock implementation
+        if file_path.endswith(".pdf"):
+            return "This is a sample text extracted from a PDF document."
+        elif file_path.endswith(".docx"):
+            return "This is a sample text extracted from a DOCX document."
+        elif file_path.endswith(".txt"):
+            return "This is a sample text extracted from a TXT document."
+        else:
+            raise ValueError("Unsupported file type or file type not recognized.")
+    except Exception as e:
+        raise RuntimeError(f"Failed to extract text from document: {e}")
