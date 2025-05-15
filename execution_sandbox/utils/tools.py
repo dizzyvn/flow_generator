@@ -21,6 +21,7 @@ def fetch_emails(query: str, max_results: Optional[int] = 10) -> List[Dict[str, 
             - subject (str): Subject line of the email.
             - body (str): Email content.
             - timestamp (str): Time received in ISO 8601 format.
+            - thread_id (str): Unique identifier of the email thread.
     """
     mock_data = [
         {
@@ -29,6 +30,7 @@ def fetch_emails(query: str, max_results: Optional[int] = 10) -> List[Dict[str, 
             "subject": f"Subject {i}: {query}",
             "body": f"This is the body of the email that matches the query '{query}'.",
             "timestamp": f"2023-10-01T0{i}:00:00Z",
+            "thread_id": f"thread_{i}",
         }
         for i in range(1, (max_results or 10) + 1)
     ]
@@ -61,6 +63,59 @@ def send_mail(
             - message_id (str): ID of the sent message.
     """
     return {"status": "success", "message_id": "msg-67890"}
+
+
+def forward_email(
+    email_id: str,
+    recipient: str,
+    subject: Optional[str] = None,
+    body: Optional[str] = None,
+    attachments: Optional[List[Dict[str, str]]] = None,
+) -> Dict[str, str]:
+    """
+    Mocks forwarding an email to a specified recipient.
+
+    Parameters:
+        email_id (str): ID of the email to forward.
+        recipient (str): Email address of the new recipient.
+        subject (str, optional): Custom subject line. Defaults to "Fwd: <original subject>".
+        body (str, optional): Custom body. Defaults to "Forwarded message: <original body>".
+        attachments (list of dict, optional): Mock attachments.
+
+    Returns:
+        Dict[str, str]: A dictionary containing:
+            - status (str): "success" or "failure".
+            - forwarded_message_id (str): Mock ID of the forwarded message.
+            - original_email_id (str): ID of the original message.
+            - recipient (str): The new recipient's email.
+    """
+    # Mock lookup of the original email
+    original_email = {
+        "email_id": email_id,
+        "sender": "original.sender@example.com",
+        "subject": "Original Subject",
+        "body": "This is the original email body.",
+        "timestamp": "2023-10-01T10:00:00Z",
+    }
+
+    # Default values if subject/body not provided
+    fwd_subject = subject or f"Fwd: {original_email['subject']}"
+    fwd_body = body or (
+        f"---------- Forwarded message ----------\n"
+        f"From: {original_email['sender']}\n"
+        f"Date: {original_email['timestamp']}\n"
+        f"Subject: {original_email['subject']}\n\n"
+        f"{original_email['body']}"
+    )
+
+    return {
+        "status": "success",
+        "forwarded_message_id": "fwd-12345",
+        "original_email_id": email_id,
+        "recipient": recipient,
+        "subject": fwd_subject,
+        "body": fwd_body,
+    }
 
 
 def llm_generation(
