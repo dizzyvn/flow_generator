@@ -1,0 +1,22 @@
+Help a researcher find academic articles, summarize findings, and draft a follow-up email to a colleague.
+Fetch incoming emails about a project, auto-reply to them, and log the summaries.
+Suggest travel destinations based on user interest, current weather, and web resources.
+Help a data scientist find and extract structured content from reports.
+Automatically compile a daily competitive landscape update for a business analyst.
+Respond to simple customer queries with AI.
+send an email to my college which summarize the latest acadmic papers (5 papers is ok) about a topic. Need to summarize the full paper not only abstract.
+read the latest email, if it from thientquang@gmail.com, automate reply it.
+check my latest 5 emails, for which from thientquang@gmail.com, auto reply it.
+check my latest 5 emails, classify it into topics work, personal, spam. Then forward them to different emails.
+check my latest emails, extract their topic, intent, entities, then write an proper reply using these information. Maximize execution speed with parallel execution.
+
+
+[Email management]
+Remove unread emails that is advertising
+Remove unread emails that is advertising, however, keep the email that the sale is more that 50%
+Remove unread emails that is advertising, however, but if the email have sale more than 50%, summarize them into a combined sale letter and send back to my email. Then also remove them.
+
+Filter last email into categories (urgent, info, spam), generate reply drafts for urgent ones, and archive spam
+Filter emails into categories (urgent, info, spam), generate reply drafts for urgent ones, and archive spam
+Filter emails into categories (urgent, info, spam), generate reply drafts for urgent ones, archive spam and summary all info emails into a short report.
+

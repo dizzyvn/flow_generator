@@ -115,6 +115,10 @@ class Node(BaseNode):
             raise e
 
 
+class StartNode(Node):
+    pass
+
+
 class TerminateNode(Node):
     pass
 
@@ -159,7 +163,12 @@ class Flow(BaseNode):
             actions = [action] if action else node.successors.keys()
 
             for curr_action in actions:
-                for succ in node.successors.get(curr_action, []):
+                # Get successors for this action and ensure it's a list
+                successors = node.successors.get(curr_action, [])
+                if not isinstance(successors, list):
+                    successors = [successors]
+
+                for succ in successors:
                     if succ not in dependencies:
                         dependencies[succ] = set()
                     if succ not in reverse_deps:
@@ -180,6 +189,7 @@ class Flow(BaseNode):
         p = params or {**self.params}
 
         def execute_node(node):
+            print(node.__class__.__name__, type(node))
             if node in action_map:  # Skip if already executed
                 return
 

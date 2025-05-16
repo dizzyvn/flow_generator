@@ -1,6 +1,6 @@
 <document>
 # Echo example
-from pocketflow import Node, Flow
+from pocketflow_v2 import Node, Flow
 from utils.call_llm import call_llm
 
 class AnswerNode(Node):

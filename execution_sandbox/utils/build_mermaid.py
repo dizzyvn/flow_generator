@@ -3,7 +3,7 @@ import inspect
 import logging
 import textwrap
 
-from pocketflow import BatchNode, Flow, Node, TerminateNode
+from pocketflow_v2 import BatchNode, Flow, Node, StartNode, TerminateNode
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -54,20 +54,11 @@ def build_mermaid(start):
         else:
             lines.append(f"    {a} --> {b}")
 
-    def get_node_style(node):
-        if isinstance(node, BatchNode):
-            return (
-                "fill:#ffd700,stroke:#333,stroke-width:2px"  # Gold color for BatchNode
-            )
-        elif isinstance(node, TerminateNode):
-            return "fill:#ff6b6b,stroke:#333,stroke-width:2px"  # Red color for TerminateNode
-        elif isinstance(node, Node):
-            return "fill:#90EE90,stroke:#333,stroke-width:2px"  # Light green for regular Node
-        return "fill:#f9f9f9,stroke:#333,stroke-width:2px"  # Default style
-
     def get_node_label(node):
         if isinstance(node, TerminateNode):
-            return "TERMINATE"
+            return " "
+        elif isinstance(node, StartNode):
+            return " "
         elif isinstance(node, BatchNode):
             node_type = "BatchNode"
         elif isinstance(node, Node):
@@ -79,25 +70,6 @@ def build_mermaid(start):
         function_calls = get_exec_function_calls(node)
         logger.debug(f"Node {node_name} has function calls: {function_calls}")
 
-        # # Get post method's return value if available
-        # post_action = None
-        # if hasattr(node, "post"):
-        #     try:
-        #         post_source = inspect.getsource(node.post)
-        #         # Look for return statement in post method
-        #         for line in post_source.split("\n"):
-        #             if "return" in line:
-        #                 # Split by # to remove comments
-        #                 return_part = line.split("#")[0]
-        #                 # Extract the return value
-        #                 post_action = (
-        #                     return_part.split("return")[1].strip().strip("\"'")
-        #                 )
-        #                 break
-        #     except Exception:
-        #         pass
-        # if post_action:
-        #     label_parts.append(f"Returns: {post_action}")
         label_parts = [f"{node_type}<br>{node_name}"]
         if function_calls:
             label_parts.append(f"Tools: {', '.join(function_calls)}")
@@ -126,11 +98,20 @@ def build_mermaid(start):
             lines.append("    end\n")
         else:
             node_id = get_id(node)
-            style = get_node_style(node)
             label = get_node_label(node)
             logger.debug(f"Creating node with label: {label}")
-            lines.append(f"    {node_id}[{label}]:::node_{node_id}")
-            lines.append(f"    classDef node_{node_id} {style}")
+
+            # Choose node shape based on node type
+            if isinstance(node, BatchNode):
+                lines.append(f'    {node_id}@{{shape: procs, label: "{label}"}}')
+            elif isinstance(node, StartNode):
+                lines.append(f'    {node_id}@{{shape: circle, label: "{label}"}}')
+            elif isinstance(node, TerminateNode):
+                lines.append(f'    {node_id}@{{shape: doublecircle, label: "{label}"}}')
+            else:
+                # For regular nodes, use standard rectangle
+                lines.append(f"    {node_id}[{label}]")
+
             parent and link(parent, node_id, condition)
             if hasattr(node, "successors"):
                 for cond, successors in node.successors.items():
@@ -138,4 +119,5 @@ def build_mermaid(start):
                         walk(succ, node_id, cond)
 
     walk(start)
+    print("\n".join(lines))
     return "\n".join(lines)

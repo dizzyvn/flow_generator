@@ -20,14 +20,14 @@ class GenerateCode(Node):
         system_prompt = f"""
         You are a code generation expert that creates PocketFlow applications. You will be given requirement and must generate a complete flow implementation.
 
-        PocketFlow Documentation:
+        PocketFlow v2 Documentation:
         {pocketflow_doc}
 
         Available Tools:
         {tools_doc}
 
         Design a complete flow that satisfies the requirement following these rules:
-        1. Follow PocketFlow's patterns and best practices
+        1. Follow PocketFlow v2's patterns and best practices
         2. Have clear node responsibilities and transitions
         3. Use only the provided tools in node.exec() methods
         4. Each node must follow the three-step pattern: prep(), exec(), post()
@@ -35,19 +35,13 @@ class GenerateCode(Node):
         For each node:
         - Name of the node file must end with "_node.py". They will be placed in `nodes` and imported as `from nodes.node_name import NodeName`
         - If the node take a single input, use Node. If the node takes a batch of input, process each item, and return a batch of output, use BatchNode.
-        - Pre-processing logic goes in prep()
-        - Post-processing logic goes in post()
-        - The exec() method of a node MUST USE ONLY ONE of the provided tools, or directly return the prep_res. If a step require multiple tools, split it into multiple nodes. Only the following code is allowed!
-        ```python
-        def exec(self, prep_res): # ONLY prep_res is used as input !!! 
-            # NO data processing in exec()
-            return selected_tool(prep_res)
-            or return prep_res
-        ```
-        and
+        - prep() is used to prepare the data for the tool from the shared store and define all parameters of the tool (including constants, prompts...). Some preprocessing can be done here.
+        - post() is used to write the data to the shared store and return action to routing.
+        - exec() is used to execute the tool. MUST USE ONLY ONE of the provided tools. If a step require multiple tools, split it into multiple nodes.
+        - **IMPORTANT** Only the following code is allowed! Only prep_res is used as input! No variable assignment is allowed in exec().
         ```python
         def exec(self, prep_res):
-            return prep_res
+            return selected_tool(prep_res)
         ```
         - All the preprocessing must be done in prep(). Instead of
         ```python
@@ -55,20 +49,26 @@ class GenerateCode(Node):
             x = shared['x']
             return {{'x': x}}
 
-        def exec(self, prep_res):            
+        def exec(self, prep_res):
             y = prep_res['y']
             return selected_tool(y)
         ```
+
         Do this:
+
         ```python
         def prep(self, shared):
-            y = shared['x']['y']            
+            y = shared['x']['y']
             return {{'y': y}}
 
-        def exec(self, prep_res):            
+        def exec(self, prep_res):
             return selected_tool(**prep_res)
-        ```                        
+        ```
 
+        # Design preference:
+        - Activeness: Use conditional branching when the execution of a node depends on the outcome of a previous node.
+        - Efficiency: Use parallel branching when nodes can be executed independently to improve performance.
+        - Simplicity: Avoid including nodes that do not perform any meaningful action — every node should serve a purpose.
 
         Output Format:
         Your response must contain exactly these files, each wrapped in a code block with the filename:
@@ -79,7 +79,7 @@ class GenerateCode(Node):
         ```
 
         ```node_name.py
-        from pocketflow import Node
+        from pocketflow_v2 import Node        
         from utils.tools import tool_name # Tools is located in `utils/tools.py` !!
 
         class NodeName(Node):
@@ -102,21 +102,29 @@ class GenerateCode(Node):
 
                 # Also, return action to routing if needed
                 # Example:
-                if ...:                    
+                if ...:
                     return "action_1"
-                else:                    
+                else:
                     return "action_2"
         ```
 
         ```flow.py
-        from pocketflow import Flow, TerminateNode
+        from pocketflow_v2 import Flow, StartNode, TerminateNode
         from nodes.node_name import NodeName
-
-        terminate_node = TerminateNode()
 
         def create_flow():
             # Create and connect nodes, use the node_name.py file as a reference
+            # Explicitly use start_node to start the flow
             # Explicitly use terminate_node to terminate the flow
+            terminate_node = TerminateNode()
+            start_node = StartNode()
+
+            # Connect nodes
+            start_node >> ...
+            ...
+            ... >> terminate_node
+
+            return Flow(start=start_node) # MUST START WITH START NODE
         ```
 
         ```main.py

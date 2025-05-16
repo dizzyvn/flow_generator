@@ -3,7 +3,7 @@ Mock implementation of various email, LLM, and web tools for testing and prototy
 Note: These are placeholders and do not perform real operations.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 
 def fetch_emails(query: str, max_results: Optional[int] = 10) -> List[Dict[str, Any]]:
@@ -118,12 +118,57 @@ def forward_email(
     }
 
 
+def modify_email(
+    email_id: str, action: Literal["archive", "set_to_read", "delete"]
+) -> Dict[str, str]:
+    """
+    Mocks performing an action on an email.
+
+    Parameters:
+        email_id (str): The ID of the email to be modified.
+        action (str): The action to perform: "archive", "set_to_read", or "delete".
+
+    Returns:
+        Dict[str, str]: A dictionary indicating the result of the operation:
+            - status (str): "success" or "failure".
+            - email_id (str): The ID of the modified email.
+            - action (str): The action that was performed.
+    """
+    # Mock email database
+    mock_email_db = {
+        "123": {"status": "unread", "folder": "inbox", "deleted": False},
+        "456": {"status": "read", "folder": "archive", "deleted": False},
+    }
+
+    if email_id not in mock_email_db:
+        return {
+            "status": "failure",
+            "email_id": email_id,
+            "action": action,
+        }
+
+    email = mock_email_db[email_id]
+
+    if action == "archive":
+        email["folder"] = "archive"
+    elif action == "set_to_read":
+        email["status"] = "read"
+    elif action == "delete":
+        email["deleted"] = True
+
+    return {
+        "status": "success",
+        "email_id": email_id,
+        "action": action,
+    }
+
+
 def llm_generation(
     prompt: str,
     temperature: float = 0.7,
     max_tokens: int = 512,
     system_prompt: Optional[str] = None,
-) -> Dict[str, str]:
+) -> str:
     """
     Generates text based on a prompt using a mock LLM.
 
@@ -134,10 +179,61 @@ def llm_generation(
         system_prompt (str, optional): Context-setting message.
 
     Returns:
-        Dict[str, str]: A dictionary containing:
-            - completion (str): Generated response text.
+        completion (str): Generated response text.
     """
-    return {"completion": "This is a generated response based on the prompt."}
+    return "This is a generated response based on the prompt."
+
+
+def structured_llm_generation(
+    prompt: str,
+    schema: Dict[str, Any],
+    temperature: float = 0.7,
+    max_tokens: int = 512,
+    system_prompt: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Generates structured data based on a prompt and a simple schema.
+
+    Parameters:
+        prompt (str): The input prompt to generate from.
+        schema (Dict[str, Any]): A dictionary describing the expected output format.
+            Supported value types for fields: "string", "integer", "number", "boolean", "array", "object"
+            Example:
+                schema = {
+                    "name": "string",
+                    "age": "integer",
+                    "gpa": "number",
+                    "is_student": "boolean",
+                    "tags": "array",
+                    "profile": "object"
+                }
+
+        temperature (float): Controls randomness in generation.
+        max_tokens (int): Maximum number of tokens to generate.
+        system_prompt (str, optional): Optional context or instructions for the model.
+
+    Returns:
+        Dict[str, Any]: A dictionary matching the shape of the given schema.
+    """
+    # Generate mock data based on the schema
+    mock_data = {}
+    for key, field_type in schema.items():
+        if field_type == "string":
+            mock_data[key] = f"Example {key}"
+        elif field_type == "integer":
+            mock_data[key] = 42
+        elif field_type == "number":
+            mock_data[key] = 3.14
+        elif field_type == "boolean":
+            mock_data[key] = True
+        elif field_type == "array":
+            mock_data[key] = [f"{key} item"]
+        elif field_type == "object":
+            mock_data[key] = {"nested_key": f"{key} value"}
+        else:
+            mock_data[key] = None
+
+    return mock_data
 
 
 def search_web(query: str, num_results: int = 10) -> List[Dict[str, str]]:
